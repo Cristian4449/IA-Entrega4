@@ -31,15 +31,20 @@ productos_precios = {
     "Cafe": 5.9,
     "Harina": 3.1,
 }
-
+cromosoma=None
 # Crear una población inicial de posibles listas de compras
 def generar_poblacion(tamano_poblacion, num_productos, productos):
+    global cromosoma
     poblacion = []
-    for _ in range(tamano_poblacion):
-        cromosoma = random.sample(productos, num_productos - 2)  
-        productos_prioritarios = random.sample(["Leche entera", "Carne de res"], 2)  
-        cromosoma.extend(productos_prioritarios) 
-        poblacion.append(cromosoma)
+    
+    if(cromosoma==None):
+        cromosoma = random.sample(productos, num_productos - 2)
+        for _ in range(tamano_poblacion):
+            productos_prioritarios = random.sample(["Leche entera", "Carne de res"], 2)  
+            print(f' PRIMER CROMOSOMA{cromosoma}')
+            cromosoma.extend(productos_prioritarios) 
+            print(f' SEGUNDO CROMOSOMA CROMOSOMA{cromosoma}')
+            poblacion.append(cromosoma)
     return poblacion
 
 # Función de aptitud: evalúa la conveniencia de la lista basándose en precios
@@ -55,13 +60,17 @@ def cruzar(padre1, padre2):
     punto_cruce = random.randint(0, len(padre1) - 1)
     hijo1 = padre1[:punto_cruce] + [gen for gen in padre2 if gen not in padre1[:punto_cruce]]
     hijo2 = padre2[:punto_cruce] + [gen for gen in padre1 if gen not in padre2[:punto_cruce]]
+
     return hijo1, hijo2
 
 # Mutar una lista de compras cambiando dos productos de lugar
 def mutar(individuo):
     puntos_muta = random.sample(range(len(individuo)), 2)
+    
+
     individuo[puntos_muta[0]], individuo[puntos_muta[1]] = individuo[puntos_muta[1]], individuo[puntos_muta[0]]
     return individuo
+
 
 # Algoritmo genético completo
 def algoritmo_genetico(tamano_poblacion, tasa_mutacion, generaciones, num_productos):
@@ -89,9 +98,8 @@ def algoritmo_genetico(tamano_poblacion, tasa_mutacion, generaciones, num_produc
             if random.random() < tasa_mutacion:
                 print(f'Mutación en individuo: {hijo2}')
                 hijo2 = mutar(hijo2)
-
+            #EL EXTEND UNE LOS DOS HIJOS
             nueva_generacion.extend([hijo1, hijo2])
-
         poblacion = nueva_generacion
         puntuaciones = evaluar_poblacion(poblacion, productos_precios)
 

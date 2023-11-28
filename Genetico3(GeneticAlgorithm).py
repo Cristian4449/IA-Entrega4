@@ -35,7 +35,6 @@ productos_precios = {
 }
 
 limite_presupuesto = 20.0  # Puedes ajustar este valor según tu presupuesto
-n_productos_seleccionados = 5  # Seleccionar exactamente 5 productos por cromosoma
 
 # Función de aptitud (fitness) que se debe minimizar
 def fitness_function(X):
@@ -46,10 +45,6 @@ def fitness_function(X):
 
 # Configuración del algoritmo genético
 varbound = np.array([[0, 1]] * len(productos_precios))  # Cada variable binaria indica si se selecciona o no un producto
-
-# Redefinir el límite superior para el número de productos seleccionados
-varbound[:, 1] = 1  # Establecer todas las posiciones a 1 (seleccionadas)
-varbound[n_productos_seleccionados:, 1] = 0  # Establecer las posiciones adicionales a 0 (no seleccionadas)
 
 algorithm_param = {'max_num_iteration': 50, 'population_size': 50, 'mutation_probability': 0.1, 'elit_ratio': 0.01,
                    'crossover_probability': 0.5, 'crossover_type': 'uniform', 'max_iteration_without_improv': None,
@@ -74,4 +69,3 @@ for i, (producto, seleccionado) in enumerate(zip(productos_precios.keys(), best_
 precio_total_seleccionado = sum(productos_precios[producto] for producto, seleccionado in zip(productos_precios.keys(), best_solution) if seleccionado)
 print("Precio total seleccionado:", precio_total_seleccionado)
 print("Presupuesto excedido:", best_fitness)
-

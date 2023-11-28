@@ -46,9 +46,9 @@ def fitness_function(X):
 # Configuración del algoritmo genético
 varbound = np.array([[0, 1]] * len(productos_precios))  # Cada variable binaria indica si se selecciona o no un producto
 
-algorithm_param = {'max_num_iteration': 50, 'population_size': 50, 'mutation_probability': 0.1, 'elit_ratio': 0.01,
-                   'crossover_probability': 0.5, 'crossover_type': 'uniform', 'max_iteration_without_improv': None,
-                   'parents_portion': 0.3}  # Ajusta esta proporción según tus necesidades
+algorithm_param = {'max_num_iteration': 50, 'population_size': 50, 'mutation_probability': 0.5, 'elit_ratio': 0.1,
+                   'crossover_probability': 0.5, 'crossover_type': 'two_point', 'max_iteration_without_improv': None,
+                   'parents_portion': 0.5}  # Ajusta esta proporción según tus necesidades
 
 model = ga(function=fitness_function, dimension=len(productos_precios), variable_type='bool', variable_boundaries=varbound,
            algorithm_parameters=algorithm_param)

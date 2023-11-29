@@ -69,6 +69,7 @@ stats.register("max", numpy.max)
 
 # Ejecutar el algoritmo genético con impresión de detalles de cada individuo
 for gen in range(number_of_generations):
+    #genera la desendencia con la variable offspring usando la funcion varAnd que hace los cruces y mutacion
     offspring = algorithms.varAnd(pop, toolbox, cxpb=0.5, mutpb=0.2)
     fits = toolbox.map(toolbox.evaluate, offspring)
     for fit, ind in zip(fits, offspring):

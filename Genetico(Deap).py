@@ -45,8 +45,8 @@ def print_individual_details(individual, productos_precios, flag = False):
         print(f"Individuo: {individual} - Costo: ${costo_total}")
 
 # Parámetros del algoritmo genético
-size_of_population = 30
-number_of_generations = 200
+size_of_population = 80
+number_of_generations = 100
 
 # Crear población
 pop = toolbox.population(n=size_of_population)

@@ -15,19 +15,19 @@ PRESUPUESTO_MAXIMO = 20  #Cambiar según sea necesario
 
 # Crear tipos de Fitness y Individuo
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", list, fitness=creator.FitnessMax)
+creator.create("Cromosoma", list, fitness=creator.FitnessMax)
 
-# Función para inicializar individuos
-def create_individual():
+# Función para inicializar cromosomas
+def create_cromosoma():
     return [random.randint(0, 1) for _ in productos_precios]
 
 toolbox = base.Toolbox()
-toolbox.register("individual", tools.initIterate, creator.Individual, create_individual)
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+toolbox.register("cromosoma", tools.initIterate, creator.Cromosoma, create_cromosoma)
+toolbox.register("population", tools.initRepeat, list, toolbox.cromosoma)
 
 # Función de evaluación
-def evaluar_individuo(individual):
-    total_cost = sum(individual[i] * price for i, price in enumerate(productos_precios.values()))
+def evaluar_individuo(cromosoma):
+    total_cost = sum(cromosoma[i] * price for i, price in enumerate(productos_precios.values()))
     return (total_cost,) if total_cost <= PRESUPUESTO_MAXIMO else (0,)
 
 toolbox.register("evaluate", evaluar_individuo)
@@ -36,13 +36,13 @@ toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
 # Función para imprimir detalles de cada individuo
-def print_individual_details(individual, productos_precios, flag = False):
-    productos_seleccionados = [producto for producto, selected in zip(productos_precios.keys(), individual) if selected]
+def print_cromosoma_details(cromosoma, productos_precios, flag = False):
+    productos_seleccionados = [producto for producto, selected in zip(productos_precios.keys(), cromosoma) if selected]
     costo_total = sum(productos_precios[producto] for producto in productos_seleccionados)
     if flag:
         print(f"Productos: {productos_seleccionados} - Costo: ${costo_total} ")
     else:
-        print(f"Individuo: {individual} - Costo: ${costo_total}")
+        print(f"Cromosoma: {cromosoma} - Costo: ${costo_total}")
 
 # Parámetros del algoritmo genético
 size_of_population = 80
@@ -69,7 +69,7 @@ for gen in range(number_of_generations):
     # Imprimir detalles de cada individuo en la generación actual
     print(f"\nGeneración {gen + 1}")
     for ind in pop:
-        print_individual_details(ind, productos_precios)
+        print_cromosoma_details(ind, productos_precios)
 
     # Actualizar Hall of Fame
     hof.update(pop)
@@ -77,4 +77,4 @@ for gen in range(number_of_generations):
 # Mejor individuo
 mejor_individuo = hof[0]
 print("\nMejor cromosoma final (representación binaria):", mejor_individuo)
-print_individual_details(mejor_individuo, productos_precios, True)
+print_cromosoma_details(mejor_individuo, productos_precios, True)

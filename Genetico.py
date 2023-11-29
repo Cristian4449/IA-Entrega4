@@ -36,10 +36,13 @@ toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
 # Función para imprimir detalles de cada individuo
-def print_individual_details(individual, productos_precios):
+def print_individual_details(individual, productos_precios, flag = False):
     productos_seleccionados = [producto for producto, selected in zip(productos_precios.keys(), individual) if selected]
     costo_total = sum(productos_precios[producto] for producto in productos_seleccionados)
-    print(f"Cromosoma: {individual} - Costo: ${costo_total}")
+    if flag:
+        print(f"Productos: {productos_seleccionados} - Costo: ${costo_total} ")
+    else:
+        print(f"Individuo: {individual} - Costo: ${costo_total}")
 
 # Parámetros del algoritmo genético
 size_of_population = 30
@@ -74,5 +77,4 @@ for gen in range(number_of_generations):
 # Mejor individuo
 mejor_individuo = hof[0]
 print("\nMejor cromosoma final (representación binaria):", mejor_individuo)
-productos_seleccionados = [producto for producto, selected in zip(productos_precios.keys(), mejor_individuo) if selected]
-print_individual_details(productos_seleccionados, productos_precios)
+print_individual_details(mejor_individuo, productos_precios, True)

@@ -1,112 +1,78 @@
 import random
+from deap import base, creator, tools, algorithms
+import numpy
 
-# Lista de productos en el supermercado con sus precios
+# Lista de productos y precios
 productos_precios = {
-    "Leche entera": 2.5,
-    "Pan": 1.0,
-    "Huevos": 3.0,
-    "Cebolla": 1.5,
-    "Tomate": 1.2,
-    "Manzana": 1.0,
-    "Aguacate": 2.1,
-    "Pera": 0.9,
-    "Naranja": 0.5,
-    "Papa negra": 1.7,
-    "Papa amarilla": 1.5,
-    "Carne de res": 7.0,
-    "Pasta": 1.8,
-    "Salsa": 2.2,
-    "Arroz": 1.3,
-    "Aceite": 3.5,
-    "Aceite oliva": 9.0,
-    "Leche deslactosada": 5.0,
-    "Carne de cerdo": 10.1,
-    "Pollo": 8.5,
-    "Chorizo": 12.5,
-    "Sal": 4.0,
-    "Azúcar": 3.9,
-    "Brocoli": 1.2,
-    "Panela": 7.9,
-    "Chocolate": 6.8,
-    "Cafe": 5.9,
-    "Harina": 3.1,
+    "Leche entera": 2.5, "Pan": 1.0, "Huevos": 3.0, "Cebolla": 1.5, "Tomate": 1.2, "Manzana": 1.0, "Aguacate": 2.1,
+    "Pera": 0.9, "Naranja": 0.5, "Papa negra": 1.7, "Papa amarilla": 1.5, "Carne de res": 7.0, "Pasta": 1.8, "Salsa": 2.2,
+    "Arroz": 1.3, "Aceite": 3.5, "Aceite oliva": 9.0, "Leche deslactosada": 5.0, "Carne de cerdo": 10.1, "Pollo": 8.5,
+    "Chorizo": 12.5, "Sal": 4.0, "Azúcar": 3.9, "Brocoli": 1.2, "Panela": 7.9, "Chocolate": 6.8, "Cafe": 5.9, "Harina": 3.1,
 }
-cromosoma=None
-# Crear una población inicial de posibles listas de compras
-def generar_poblacion(tamano_poblacion, num_productos, productos):
-    global cromosoma
-    poblacion = []
-    
-    if(cromosoma==None):
-        cromosoma = random.sample(productos, num_productos - 2)
-    for _ in range(tamano_poblacion):
-        productos_prioritarios = random.sample(["Leche entera", "Carne de res"], 2)  
-        print(f' PRIMER CROMOSOMA{cromosoma}')
-        cromosoma.extend(productos_prioritarios) 
-        print(f' SEGUNDO CROMOSOMA CROMOSOMA{cromosoma}')
-        poblacion.append(cromosoma)
-    return poblacion
 
-# Función de aptitud: evalúa la conveniencia de la lista basándose en precios
-def evaluar_poblacion(poblacion, precios):
-    return [sum(precios[producto] for producto in lista) for lista in poblacion]
+# Presupuesto máximo
+PRESUPUESTO_MAXIMO = 20  #Cambiar según sea necesario
 
-# Seleccionar dos padres al azar
-def seleccionar_padres(poblacion):
-    return random.sample(poblacion, 2)
+# Crear tipos de Fitness y Individuo
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", list, fitness=creator.FitnessMax)
 
-# Cruzar dos listas de compras para producir dos descendientes
-def cruzar(padre1, padre2):
-    punto_cruce = random.randint(0, len(padre1) - 1)
-    hijo1 = padre1[:punto_cruce] + [gen for gen in padre2 if gen not in padre1[:punto_cruce]]
-    hijo2 = padre2[:punto_cruce] + [gen for gen in padre1 if gen not in padre2[:punto_cruce]]
+# Función para inicializar individuos
+def create_individual():
+    return [random.randint(0, 1) for _ in productos_precios]
 
-    return hijo1, hijo2
+toolbox = base.Toolbox()
+toolbox.register("individual", tools.initIterate, creator.Individual, create_individual)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-# Mutar una lista de compras cambiando dos productos de lugar
-def mutar(individuo):
-    puntos_muta = random.sample(range(len(individuo)), 2)
-    
+# Función de evaluación
+def evaluar_individuo(individual):
+    total_cost = sum(individual[i] * price for i, price in enumerate(productos_precios.values()))
+    return (total_cost,) if total_cost <= PRESUPUESTO_MAXIMO else (0,)
 
-    individuo[puntos_muta[0]], individuo[puntos_muta[1]] = individuo[puntos_muta[1]], individuo[puntos_muta[0]]
-    return individuo
+toolbox.register("evaluate", evaluar_individuo)
+toolbox.register("mate", tools.cxTwoPoint)
+toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+toolbox.register("select", tools.selTournament, tournsize=3)
 
+# Función para imprimir detalles de cada individuo
+def print_individual_details(individual, productos_precios):
+    productos_seleccionados = [producto for producto, selected in zip(productos_precios.keys(), individual) if selected]
+    costo_total = sum(productos_precios[producto] for producto in productos_seleccionados)
+    print(f"Cromosoma: {individual} - Costo: ${costo_total}")
 
-# Algoritmo genético completo
-def algoritmo_genetico(tamano_poblacion, tasa_mutacion, generaciones, num_productos):
-    productos = list(productos_precios.keys())
-    
-    poblacion = generar_poblacion(tamano_poblacion, num_productos, productos)
-    puntuaciones = evaluar_poblacion(poblacion, productos_precios)
+# Parámetros del algoritmo genético
+size_of_population = 30
+number_of_generations = 200
 
-    for generacion in range(generaciones):
-        aptitud_maxima = max(puntuaciones)
-        aptitud_promedio = sum(puntuaciones) / len(puntuaciones)
-        mejor_lista = poblacion[puntuaciones.index(aptitud_maxima)]
-        
-        print(f'\nGeneración {generacion + 1}: {mejor_lista}, \nAptitud Máxima: {aptitud_maxima}, \nAptitud Promedio: {aptitud_promedio}')
+# Crear población
+pop = toolbox.population(n=size_of_population)
+hof = tools.HallOfFame(1)
 
-        nueva_generacion = []
+stats = tools.Statistics(lambda ind: ind.fitness.values)
+stats.register("avg", numpy.mean)
+stats.register("min", numpy.min)
+stats.register("max", numpy.max)
 
-        for _ in range(tamano_poblacion // 2):
-            padre1, padre2 = seleccionar_padres(poblacion)
-            hijo1, hijo2 = cruzar(padre1, padre2)
+# Ejecutar el algoritmo genético con impresión de detalles de cada individuo
+for gen in range(number_of_generations):
+    offspring = algorithms.varAnd(pop, toolbox, cxpb=0.5, mutpb=0.2)
+    fits = toolbox.map(toolbox.evaluate, offspring)
+    for fit, ind in zip(fits, offspring):
+        ind.fitness.values = fit
 
-            if random.random() < tasa_mutacion:
-                print(f'Mutación en individuo: {hijo1}')
-                hijo1 = mutar(hijo1)
-            if random.random() < tasa_mutacion:
-                print(f'Mutación en individuo: {hijo2}')
-                hijo2 = mutar(hijo2)
-            #EL EXTEND UNE LOS DOS HIJOS
-            nueva_generacion.extend([hijo1, hijo2])
-        poblacion = nueva_generacion
-        puntuaciones = evaluar_poblacion(poblacion, productos_precios)
+    pop = toolbox.select(offspring, k=len(pop))
 
-# Ejemplo de uso:
-tamano_poblacion = 10
-tasa_mutacion = 0.5
-generaciones = 10
-num_productos = 5
+    # Imprimir detalles de cada individuo en la generación actual
+    print(f"\nGeneración {gen + 1}")
+    for ind in pop:
+        print_individual_details(ind, productos_precios)
 
-algoritmo_genetico(tamano_poblacion, tasa_mutacion, generaciones, num_productos)
+    # Actualizar Hall of Fame
+    hof.update(pop)
+
+# Mejor individuo
+mejor_individuo = hof[0]
+print("\nMejor cromosoma final (representación binaria):", mejor_individuo)
+productos_seleccionados = [producto for producto, selected in zip(productos_precios.keys(), mejor_individuo) if selected]
+print_individual_details(productos_seleccionados, productos_precios)

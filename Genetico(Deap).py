@@ -1,6 +1,7 @@
 import random
 from deap import base, creator, tools, algorithms
 import numpy
+import matplotlib.pyplot as plt
 
 # Lista de productos y precios
 productos_precios = {
@@ -19,6 +20,10 @@ productos_precios = {
     "Panela": 7.9, "Chocolate": 6.8,
     "Cafe": 5.9, "Harina": 3.1,
 }
+# Lista para almacenar estadísticas
+avg_stats = []
+min_stats = []
+max_stats = []
 
 # Presupuesto máximo
 PRESUPUESTO_MAXIMO = 20  #Cambiar según sea necesario
@@ -76,6 +81,11 @@ for gen in range(number_of_generations):
 
     pop = toolbox.select(offspring, k=len(pop))
 
+    record = stats.compile(pop)
+    avg_stats.append(record["avg"])
+    min_stats.append(record["min"])
+    max_stats.append(record["max"])
+    
     # Imprimir detalles de cada individuo en la generación actual
     print(f"\nGeneración {gen + 1}")
     for ind in pop:
@@ -83,6 +93,18 @@ for gen in range(number_of_generations):
 
     # Actualizar Hall of Fame
     hof.update(pop)
+# Graficar estadísticas
+gen_range = range(1, number_of_generations + 1)
+plt.figure(figsize=(10, 6))
+plt.plot(gen_range, avg_stats, label="Promedio")
+plt.plot(gen_range, min_stats, label="Mínimo")
+plt.plot(gen_range, max_stats, label="Máximo")
+plt.xlabel("Generación")
+plt.ylabel("Costo")
+plt.title("Evolución del Costo a lo largo de las Generaciones")
+plt.legend()
+plt.grid(True)
+plt.show()
 
 # Mejor individuo
 mejor_individuo = hof[0]

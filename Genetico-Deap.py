@@ -98,7 +98,6 @@ for gen in range(number_of_generations):
 gen_range = range(1, number_of_generations + 1)
 plt.figure(figsize=(10, 6))
 plt.plot(gen_range, avg_stats, label="Promedio")
-plt.plot(gen_range, min_stats, label="Mínimo")
 plt.plot(gen_range, max_stats, label="Máximo")
 plt.xlabel("Generación")
 plt.ylabel("Costo")
